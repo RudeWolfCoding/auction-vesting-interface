@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { Text } from 'rebass'
 import ClaimVestingTableRow from './ClaimVestingRow'
@@ -110,14 +110,18 @@ color: white;
 export default function ClaimVestingTable() {
   // const allClaims = useAllClaims() // TODO: calculate the total sum of all claims and show it
   const allVestingIdsRaw = useAllVestingIds()
+  const [prevAccount, setPrevAccount] = useState(account)
   const vestings = useMemo(
     () => allVestingIdsRaw.map((res) => Object.values(res)[0]),
     [allVestingIdsRaw],
   )
 
   useEffect(() => {
-
-  }, [vestings])
+   if(account !== prevAccount){
+     setPrevAccount(account)
+     window.location.reload()
+   }
+  }, [vestings, account, prevAccount])
 
   return (
     <Wrapper>
@@ -174,18 +178,19 @@ export default function ClaimVestingTable() {
                     </a>
                   </>) : (
                   <>
-                    <Text fontFamily={'Inter'} fontWeight={'600'} fontSize={'24px'} color={'white'} marginBottom={'5px'} marginRight={'165px'}>
+                    <Text fontFamily={'Inter'} fontWeight={'600'} fontSize={'24px'} color={'white'} marginBottom={'5px'} marginRight={'170px'}>
                       Round
                     </Text>
                     <Text fontFamily={'Inter'} fontWeight={'600'} fontSize={'24px'} color={'white'} marginBottom={'5px'}>
                       Unlocked
                     </Text>
-                    {Object.keys(TOKENSWAP_VESTING_ADDRESSES).map((key, i) =>
+                    {Object.values(TOKEN_SWAP_CONTRACTS).map(({ address, name, isPrivate }, i) =>
                       vestings[i]?.length ? (
                         <ClaimVestingTableRow
-                          key={key}
-                          name={'Ecosystem round ' + key}
-                          vestingAddress={TOKENSWAP_VESTING_ADDRESSES[key]}
+                          key={address}
+                          name={name}
+                          isPrivate={isPrivate}
+                          vestingAddress={address}
                         />
                       ) : null,
                     )
